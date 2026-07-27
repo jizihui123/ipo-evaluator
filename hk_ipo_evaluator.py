@@ -91,11 +91,11 @@ def eval_hk_ipo(name, code, ipo_price_hkd, ref_price_cny=None, fx_rate=None,
         ref_price_hkd = ref_price_cny * fx_rate
         discount = (ref_price_hkd - ipo_price_hkd) / ref_price_hkd * 100
         notes['discount'] = f"{discount:+.1f}%"
-        if discount > 20:
+        if discount >= 20:
             s, n = 5, "deep discount OK"
-        elif discount > 10:
+        elif discount >= 10:
             s, n = 4, "discount good"
-        elif discount > 5:
+        elif discount >= 5:
             s, n = 3, "discount small"
         elif discount > 0:
             s, n = 2, "discount tiny"
@@ -177,7 +177,7 @@ def eval_hk_ipo(name, code, ipo_price_hkd, ref_price_cny=None, fx_rate=None,
     # --- 8. Dark market signal ---
     dark_signal = kwargs.get('dark_signal', None)
     if dark_signal is not None:
-        if dark_signal > 5:
+        if dark_signal >= 5:
             s, n = 5, f"dark +{dark_signal}% bullish"
         elif dark_signal > 0:
             s, n = 4, f"dark +{dark_signal}% positive"
@@ -209,17 +209,19 @@ def eval_hk_ipo(name, code, ipo_price_hkd, ref_price_cny=None, fx_rate=None,
     notes['supply'] = n
 
     # --- Weighted total ---
+    # 9-dim weights (sum = 1.00)
     w = {
-        'disc': 0.13, 'rate': 0.09, 'scale': 0.04,
-        'subs': 0.13, 'corn': 0.09, 'env': 0.04,
-        'sent': 0.09, 'dark': 0.18, 'supply': 0.09,
+        'disc': 0.15, 'rate': 0.10, 'scale': 0.05,
+        'subs': 0.15, 'corn': 0.10, 'env': 0.05,
+        'sent': 0.10, 'dark': 0.20, 'supply': 0.10,
     }
     # Fallback for old 7-dim calls (no dark/supply data)
+    # Also sums to 1.00
     if dark_signal is None and ipos_same_week == 1:
         w = {
-            'disc': 0.22, 'rate': 0.12, 'scale': 0.06,
-            'subs': 0.17, 'corn': 0.11, 'env': 0.06,
-            'sent': 0.17, 'dark': 0.09, 'supply': 0.0,
+            'disc': 0.25, 'rate': 0.14, 'scale': 0.07,
+            'subs': 0.19, 'corn': 0.13, 'env': 0.07,
+            'sent': 0.15, 'dark': 0.00, 'supply': 0.00,
         }
 
     weighted = sum(scores[k] * w[k] for k in w)
@@ -228,12 +230,12 @@ def eval_hk_ipo(name, code, ipo_price_hkd, ref_price_cny=None, fx_rate=None,
 
     # --- One-vote-veto for dark signal ---
     veto_reason = None
-    if dark_signal is not None and dark_signal < -8:
+    if dark_signal is not None and dark_signal <= -8:
         advice = "SKIP -"
-        veto_reason = f"DARK VETO: dark {dark_signal}% < -8%"
-    elif dark_signal is not None and dark_signal < -4:
+        veto_reason = f"DARK VETO: dark {dark_signal}% <= -8%"
+    elif dark_signal is not None and dark_signal <= -4:
         advice = "CAUTIOUS ?"
-        veto_reason = f"DARK SOFT-VETO: dark {dark_signal}% < -4%"
+        veto_reason = f"DARK SOFT-VETO: dark {dark_signal}% <= -4%"
     elif pct >= 75:
         advice = "STRONG BUY ++"
     elif pct >= 55:
