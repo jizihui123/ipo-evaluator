@@ -83,6 +83,27 @@ def eval_hk_ipo(name, code, ipo_price_hkd, ref_price_cny=None, fx_rate=None,
     scores = {}
     notes = {}
 
+    # Type coercion: accept string inputs for numeric parameters
+    try:
+        ipo_price_hkd = float(ipo_price_hkd)
+        if ref_price_cny is not None:
+            ref_price_cny = float(ref_price_cny)
+        if fx_rate is not None:
+            fx_rate = float(fx_rate)
+        scale_hk_yi = float(scale_hk_yi)
+        if retail_oversub is not None:
+            retail_oversub = float(retail_oversub)
+        if inst_oversub is not None:
+            inst_oversub = float(inst_oversub)
+        dark_signal = kwargs.get('dark_signal', None)
+        if dark_signal is not None:
+            dark_signal = float(dark_signal)
+            kwargs['dark_signal'] = dark_signal
+        ipos_same_week = int(kwargs.get('ipos_same_week', 1))
+        kwargs['ipos_same_week'] = ipos_same_week
+    except (ValueError, TypeError) as e:
+        raise ValueError(f"Numeric parameter received non-numeric value: {e}")
+
     if fx_rate is None:
         fx_rate = 1.152  # 2026-07 CNY/HKD rate
 

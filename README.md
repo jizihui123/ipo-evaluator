@@ -55,12 +55,12 @@ Output:
 =======================================================
   Example Corp (01234.HK)
   IPO: HK$50.0 | A-share: ¥48.0 -> HK$55.30 @1RMB=1.152HKD
-  disc: -10.5% | AA+ | 20B HKD
+  disc: +9.6% | AA+ | 20.0B HKD
 =======================================================
-  disc    : 0/5  premium BAD
+  disc    : 3/5  discount small
   rate    : 4/5  AA+(4/5)
   scale   : 3/5  mid(balanced)
-  subs    : 5/5  R:15.0x I:8.0x
+  subs    : 3/5  normal
   corn    : 4/5  has cornerstone
   env     : 3/5  normal
   sent    : 3/5  mixed signals
