@@ -446,6 +446,42 @@ def run_backtest():
     # No print for consistency check, just record
     results.append(("Anker(no-dark)", "7/2", r['advice'], 15.69, "BUY" in r['advice']))
 
+    # 9. Jinghe Integrated (02249.HK) - listed 7/10, first day ~+12%
+    r = eval_hk_ipo(
+        "Jinghe", "02249.HK", 32.30,
+        ref_price_cny=None,
+        rating="AA", scale_hk_yi=70,
+        retail_oversub=344.26, inst_oversub=14.62,
+        cornerstone=True, market_env="normal", sector="semiconductor",
+        sentiment="positive", dark_signal=11.76, ipos_same_week=15,
+    )
+    print_result(r)
+    results.append(("Jinghe", "7/10", r['advice'], 12.0, True))
+
+    # 10. Basic Semiconductor (09971.HK) - listed 7/8, first day ~+8%
+    r = eval_hk_ipo(
+        "Basic Semi", "09971.HK", 31.62,
+        ref_price_cny=None,
+        rating="AA", scale_hk_yi=3,
+        retail_oversub=4812.72, inst_oversub=20.0,
+        cornerstone=True, market_env="normal", sector="semiconductor",
+        sentiment="positive", dark_signal=17.33, ipos_same_week=15,
+    )
+    print_result(r)
+    results.append(("Basic Semi", "7/8", r['advice'], 8.0, True))
+
+    # 11. Binhua Group (06745.HK) - listed 7/10, first day -18.68%
+    r = eval_hk_ipo(
+        "Binhua", "06745.HK", 3.48,
+        ref_price_cny=4.5, fx_rate=1.152,
+        rating="AA", scale_hk_yi=12,
+        retail_oversub=227.58, inst_oversub=4.26,
+        cornerstone=True, market_env="normal", sector="chemicals",
+        sentiment="negative", dark_signal=-21.26, ipos_same_week=15,
+    )
+    print_result(r)
+    results.append(("Binhua", "7/10", r['advice'], -18.68, True))
+
     # Summary
     correct = sum(1 for _, _, _, _, ok in results if ok is True)
     total = len(results)
