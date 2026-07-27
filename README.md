@@ -11,9 +11,11 @@ This tool encodes lessons from real IPO outcomes in July 2026 into a transparent
 ## Features
 
 - **9-dimension weighted scoring**: discount, rating, scale, oversubscription structure, cornerstone, market environment, sentiment, dark market signal, supply pressure
-- **One-vote-veto mechanism**: dark market < -4% triggers soft veto (CAUTIOUS), < -8% triggers hard veto (SKIP)
+- **One-vote-veto mechanism**: dark market <= -4% triggers soft veto (CAUTIOUS), <= -8% triggers hard veto (SKIP)
+- **Trading cost warning**: when BUY is advised but predicted gain (from dark signal) < 3% trading cost threshold
+- **JSON output mode**: `to_json(result)` for programmatic integration
 - **Pure Python stdlib** — no external dependencies, runs anywhere
-- **Backtest validated** with real IPO data (N=4, 100% directional accuracy)
+- **Backtest validated** with real IPO data (N=8, 100% directional accuracy)
 
 ## Installation
 
@@ -94,10 +96,17 @@ Output:
 | 55-74% | BUY | Positive expected value |
 | 40-54% | CAUTIOUS | Marginal, proceed with care |
 | <40% | SKIP | Negative expected value |
-| Dark < -4% | CAUTIOUS (veto) | Soft veto overrides score |
-| Dark < -8% | SKIP (veto) | Hard veto overrides score |
+| Dark <= -4% | CAUTIOUS (veto) | Soft veto overrides score |
+| Dark <= -8% | SKIP (veto) | Hard veto overrides score |
+| BUY + predicted < 3% | BUY + cost warning | Trading cost may exceed profit |
 
 ## Backtest Results (July 2026)
+
+| IPO | Date | Advice | Actual First Day | Correct? |
+|-----|------|--------|-----------------|----------|
+### Key Lessons
+
+**Accuracy: 8/8 = 100%** (N<20, observe not claim)
 
 | IPO | Date | Advice | Actual First Day | Correct? |
 |-----|------|--------|-----------------|----------|
@@ -105,10 +114,10 @@ Output:
 | Tongrentang (02667.HK) | 7/7 | SKIP | -39.09% | ✅ |
 | Luxshare (02475.HK) | 7/9 | CAUTIOUS (veto) | -5.18% | ✅ |
 | Puyuan (02497.HK) | 7/9 | SKIP | -37.36% | ✅ |
-
-**Accuracy: 4/4 = 100%** (N<20, observe not claim)
-
-### Key Lessons
+| Yikong Zhijia (07687.HK) | 7/8 | BUY | +9.99% | ✅ |
+| Binhua Group (06745.HK) | 7/10 | SKIP (veto) | -18.68% | ✅ |
+| Momenta | 7/8 | BUY | +6.00% | ✅ |
+| Anker (no dark) | 7/2 | BUY | +15.69% | ✅ |
 
 1. **Dark market signal is the best first-day predictor** — dark -4.95% → actual -5.18% (near-perfect)
 2. **One-vote-veto caught crashes that weighted scores missed** — Luxshare scored 52 but dark signal correctly vetoed

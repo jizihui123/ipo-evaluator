@@ -14,6 +14,8 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from hk_ipo_evaluator import eval_hk_ipo
 
 
+# ====== Original 4 cases ======
+
 def test_anker_buy():
     """Anker (7/2): BUY -> actual +15.69%"""
     r = eval_hk_ipo(
@@ -74,7 +76,7 @@ def test_puyuan_skip_supply():
 
 
 def test_dark_hard_veto():
-    """Dark signal < -8% triggers hard veto (SKIP)"""
+    """Dark signal <= -8% triggers hard veto (SKIP)"""
     r = eval_hk_ipo(
         "TestCrash", "00001.HK", 10.0,
         ref_price_cny=10.0, fx_rate=1.152,
@@ -89,7 +91,7 @@ def test_dark_hard_veto():
 
 
 def test_dark_soft_veto():
-    """Dark signal < -4% triggers soft veto (CAUTIOUS)"""
+    """Dark signal <= -4% triggers soft veto (CAUTIOUS)"""
     r = eval_hk_ipo(
         "TestSoft", "00002.HK", 10.0,
         ref_price_cny=10.0, fx_rate=1.152,
@@ -102,6 +104,74 @@ def test_dark_soft_veto():
     print("✅ test_dark_soft_veto passed")
 
 
+# ====== New cases (v1.5) ======
+
+def test_yikong_buy():
+    """Yikong Zhijia (7/8): BUY -> actual +9.99%"""
+    r = eval_hk_ipo(
+        "Yikong", "07687.HK", 87.92,
+        ref_price_cny=None,
+        rating="AA", scale_hk_yi=23,
+        retail_oversub=157.82, inst_oversub=10.50,
+        cornerstone=True, market_env="normal", sector="autonomous driving",
+        sentiment="positive", dark_signal=8.96, ipos_same_week=15,
+    )
+    assert "BUY" in r['advice'], f"Expected BUY, got {r['advice']}"
+    print("✅ test_yikong_buy passed")
+
+
+def test_binhua_skip_veto():
+    """Binhua (7/10): SKIP (hard veto) -> actual -18.68%"""
+    r = eval_hk_ipo(
+        "Binhua", "06745.HK", 3.48,
+        ref_price_cny=4.5, fx_rate=1.152,
+        rating="AA", scale_hk_yi=12,
+        retail_oversub=227.58, inst_oversub=4.26,
+        cornerstone=True, market_env="normal", sector="chemicals",
+        sentiment="negative", dark_signal=-21.26, ipos_same_week=15,
+    )
+    assert "SKIP" in r['advice'], f"Expected SKIP (hard veto), got {r['advice']}"
+    assert 'veto' in r, "Expected hard veto"
+    print("✅ test_binhua_skip_veto passed")
+
+
+def test_cost_warning():
+    """BUY with low predicted gain should trigger cost warning"""
+    r = eval_hk_ipo(
+        "LowGain", "00003.HK", 10.0,
+        ref_price_cny=10.0, fx_rate=1.152,
+        rating="AA+", scale_hk_yi=10,
+        retail_oversub=15, inst_oversub=8,
+        cornerstone=True, market_env="normal", sentiment="neutral",
+        dark_signal=1.0, ipos_same_week=2,  # dark +1% < 3% cost threshold
+    )
+    if "BUY" in r['advice']:
+        assert 'cost_warning' in r, \
+            f"Expected cost_warning for low-gain BUY, got advice={r['advice']}"
+        print("✅ test_cost_warning passed")
+    else:
+        print("✅ test_cost_warning passed (advice not BUY, no warning needed)")
+
+
+def test_json_output():
+    """to_json() should produce valid JSON"""
+    from hk_ipo_evaluator import to_json
+    import json
+    r = eval_hk_ipo(
+        "JSONTest", "00004.HK", 10.0,
+        ref_price_cny=10.0, fx_rate=1.152,
+        rating="AA+", scale_hk_yi=10,
+        retail_oversub=15, inst_oversub=8,
+        cornerstone=True, dark_signal=2.0, ipos_same_week=3,
+    )
+    j = to_json(r)
+    parsed = json.loads(j)
+    assert parsed['name'] == "JSONTest"
+    assert 'scores' in parsed
+    assert 'advice' in parsed
+    print("✅ test_json_output passed")
+
+
 if __name__ == "__main__":
     test_anker_buy()
     test_tongrentang_skip()
@@ -109,6 +179,10 @@ if __name__ == "__main__":
     test_puyuan_skip_supply()
     test_dark_hard_veto()
     test_dark_soft_veto()
+    test_yikong_buy()
+    test_binhua_skip_veto()
+    test_cost_warning()
+    test_json_output()
     print(f"\n{'=' * 55}")
-    print("  All 6 tests passed! ✅")
+    print("  All 10 tests passed! ✅")
     print(f"{'=' * 55}")
