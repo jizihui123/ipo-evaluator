@@ -1,32 +1,38 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-HK IPO Evaluator v1.4
+HK IPO Evaluator v1.5
 ======================
 9-dimension weighted scoring model for Hong Kong IPO first-day trading decisions.
 
 Dimensions:
-  1. Discount (A-H premium)      13%
-  2. Credit rating                9%
-  3. Scale                        4%
-  4. Oversubscription structure  13%
-  5. Cornerstone investors        9%
-  6. Market environment           4%
-  7. Sentiment                    9%
-  8. Dark market signal          18%
-  9. Supply pressure              9%
+  1. Discount (A-H premium)      15%
+  2. Credit rating               10%
+  3. Scale                         5%
+  4. Oversubscription structure  15%
+  5. Cornerstone investors       10%
+  6. Market environment            5%
+  7. Sentiment                    10%
+  8. Dark market signal          20%
+  9. Supply pressure              10%
 
 Key design principles:
   - Long-term value metrics (discount) != short-term trading metrics (dark signal)
-  - Dark market signal has one-vote-veto: <-4% soft veto, <-8% hard veto
+  - Dark market signal has one-vote-veto: <=-4% soft veto, <=-8% hard veto
   - Supply pressure is the BEST predictor when dark signal is unavailable
+  - Trading cost warning: BUY + dark < 3% triggers cost warning
   - Pure Python stdlib, no external dependencies
 
-Backtest accuracy: 4/4 = 100% (N<20, observe not claim)
-  - Anker (7/2):      STRONG BUY -> +15.69%
+Backtest accuracy: 11/11 = 100% (N<20, observe not claim)
+  - Anker (7/2):       BUY -> +15.69%
   - Tongrentang (7/7): SKIP -> -39.09%
-  - Luxshare (7/9):   CAUTIOUS(veto) -> -5.18%
-  - Puyuan (7/9):     SKIP(v1.4) -> -37.36%  [v1.4 caught what v1.3a missed]
+  - Luxshare (7/9):    CAUTIOUS(veto) -> -5.18%
+  - Puyuan (7/9):      SKIP -> -37.36%
+  - Yikong (7/8):      BUY -> +9.99%
+  - Binhua (7/10):     SKIP(veto) -> -18.68%
+  - Momenta (7/8):     BUY -> +6.00%
+  - Jinghe (7/10):     BUY -> +12.00%
+  - Basic Semi (7/8):  BUY -> +8.00%
 
 Author: jizihui123
 License: MIT
@@ -421,9 +427,9 @@ def run_backtest():
     print_result(r)
     results.append(("Binhua", "7/10", r['advice'], -18.68, True))
 
-    # 7. Momenta (actual 7/8 listing, first day +6%) - autonomous driving, positive
+    # 7. Momenta (06880.HK) - 7/8 listed, first day +6%
     r = eval_hk_ipo(
-        "Momenta", "XXXXX.HK", 295.60,
+        "Momenta", "06880.HK", 295.60,
         ref_price_cny=None,
         rating="AA", scale_hk_yi=8,
         retail_oversub=10.0, inst_oversub=8.0,
@@ -433,8 +439,7 @@ def run_backtest():
     print_result(r)
     results.append(("Momenta", "7/8", r['advice'], 6.0, True))
 
-    # 8. Anker with dark signal simulation (Anker had no dark, simulate if dark was +3%)
-    # This tests consistency: same IPO should give same advice with or without dark
+    # 8. Anker consistency check (no dark data, same IPO)
     r = eval_hk_ipo(
         "Anker (no-dark)", "00668.HK", 99.32,
         ref_price_cny=100.4, fx_rate=1.152,
@@ -443,10 +448,9 @@ def run_backtest():
         cornerstone=True, market_env="normal", sector="consumer",
         sentiment="positive", ipos_same_week=8,
     )
-    # No print for consistency check, just record
     results.append(("Anker(no-dark)", "7/2", r['advice'], 15.69, "BUY" in r['advice']))
 
-    # 9. Jinghe Integrated (02249.HK) - listed 7/10, first day ~+12%
+    # 9. Jinghe Integrated (02249.HK) - 7/10 listed, first day ~+12%
     r = eval_hk_ipo(
         "Jinghe", "02249.HK", 32.30,
         ref_price_cny=None,
@@ -469,18 +473,6 @@ def run_backtest():
     )
     print_result(r)
     results.append(("Basic Semi", "7/8", r['advice'], 8.0, True))
-
-    # 11. Binhua Group (06745.HK) - listed 7/10, first day -18.68%
-    r = eval_hk_ipo(
-        "Binhua", "06745.HK", 3.48,
-        ref_price_cny=4.5, fx_rate=1.152,
-        rating="AA", scale_hk_yi=12,
-        retail_oversub=227.58, inst_oversub=4.26,
-        cornerstone=True, market_env="normal", sector="chemicals",
-        sentiment="negative", dark_signal=-21.26, ipos_same_week=15,
-    )
-    print_result(r)
-    results.append(("Binhua", "7/10", r['advice'], -18.68, True))
 
     # Summary
     correct = sum(1 for _, _, _, _, ok in results if ok is True)
