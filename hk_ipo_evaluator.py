@@ -204,10 +204,14 @@ def eval_hk_ipo(name, code, ipo_price_hkd, ref_price_cny=None, fx_rate=None,
     # --- 8. Dark market signal ---
     dark_signal = kwargs.get('dark_signal', None)
     if dark_signal is not None:
-        if dark_signal >= 5:
+        if dark_signal >= 20:
+            s, n = 5, f"dark +{dark_signal}% very bullish"
+        elif dark_signal >= 10:
             s, n = 5, f"dark +{dark_signal}% bullish"
-        elif dark_signal > 0:
+        elif dark_signal >= 5:
             s, n = 4, f"dark +{dark_signal}% positive"
+        elif dark_signal > 0:
+            s, n = 4, f"dark +{dark_signal}% slight positive"
         elif dark_signal > -3:
             s, n = 3, f"dark {dark_signal}% slight weak"
         elif dark_signal > -8:
@@ -216,7 +220,7 @@ def eval_hk_ipo(name, code, ipo_price_hkd, ref_price_cny=None, fx_rate=None,
             s, n = 0, f"dark {dark_signal}% crash"
         notes['dark'] = n
     else:
-        s, n = 2, "no dark market data"
+        s, n = 2, "no dark market data (conservative)"
         notes['dark'] = n
     scores['dark'] = s
 
@@ -293,6 +297,39 @@ def eval_hk_ipo(name, code, ipo_price_hkd, ref_price_cny=None, fx_rate=None,
             f"(commission+spread+slippage). Net profit may be negative."
         )
 
+    # --- Predicted first-day range ---
+    # Based on dark signal as best predictor (validated in backtest)
+    # Historical observation: first day tends to revert ~30% toward dark signal
+    # e.g. dark +11.76% -> first day ~+12% (Jinghe), dark -4.95% -> -5.18% (Luxshare)
+    # So predicted range: [dark*0.7, dark*1.3]
+    # For extreme dark (>15%), apply mean reversion: predicted = dark * 0.6
+    if dark_signal is not None:
+        if abs(dark_signal) > 15:
+            # Extreme dark: stronger mean reversion
+            # Basic Semi: dark +17.33% -> actual +8% (ratio ~0.46)
+            # Binhua: dark -21.26% -> actual -18.68% (ratio ~0.88)
+            # Average ratio ~0.67, but wider range for extreme
+            est_center = dark_signal * 0.65
+            est_low = est_center * 0.6
+            est_high = est_center * 1.4
+        else:
+            est_low = dark_signal * 0.7
+            est_high = dark_signal * 1.3
+        # Ensure low < high (handle negatives)
+        est_min = min(est_low, est_high)
+        est_max = max(est_low, est_high)
+        predicted_range = f"{est_min:+.1f}% ~ {est_max:+.1f}%"
+    else:
+        # No dark signal: use score-based estimate
+        if pct >= 75:
+            predicted_range = "+5% ~ +20%"
+        elif pct >= 55:
+            predicted_range = "0% ~ +15%"
+        elif pct >= 40:
+            predicted_range = "-5% ~ +5%"
+        else:
+            predicted_range = "-10% ~ -3%"
+
     result = {
         'name': name,
         'code': code,
@@ -307,6 +344,7 @@ def eval_hk_ipo(name, code, ipo_price_hkd, ref_price_cny=None, fx_rate=None,
         'notes': notes,
         'weighted': f"{weighted:.1f}/5.0 ({pct:.0f}%)",
         'advice': advice,
+        'predicted_range': predicted_range,
     }
     if veto_reason:
         result['veto'] = veto_reason
@@ -331,6 +369,8 @@ def format_result(r):
             lines.append(f"  {k:8s}: {r['scores'][k]}/5  {r['notes'].get(k, '')}")
     lines.append(f"\n  Weighted: {r['weighted']}")
     lines.append(f"  Advice:   {r['advice']}")
+    if 'predicted_range' in r:
+        lines.append(f"  Est:      {r['predicted_range']}")
     if 'veto' in r:
         lines.append(f"  Veto:     {r['veto']}")
     if 'cost_warning' in r:
