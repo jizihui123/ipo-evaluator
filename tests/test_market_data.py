@@ -98,7 +98,7 @@ r = eval_hk_ipo(
     sentiment="positive", dark_signal=5.0, ipos_same_week=15,  # dark +5% = bullish
 )
 print_result(r)
-check("Momenta dark +5% -> score 5", r['scores']['dark'] == 5, f"score={r['scores']['dark']}")
+check("Momenta dark +5% -> score 4 (refined: >=5 is 4, >=10 is 5)", r['scores']['dark'] == 4, f"score={r['scores']['dark']}")
 check("Momenta supply 15 -> score 0", r['scores']['supply'] == 0, f"score={r['scores']['supply']}")
 check("Momenta advice includes BUY or CAUTIOUS (borderline)", 
       "BUY" in r['advice'] or "CAUTIOUS" in r['advice'],

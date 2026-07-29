@@ -47,7 +47,7 @@ r = eval_hk_ipo(
     sentiment="positive", dark_signal=8.96, ipos_same_week=15,
 )
 print_result(r)
-check("Yikong dark +8.96% -> dark score 5", r['scores']['dark'] == 5,
+check("Yikong dark +8.96% -> dark score 4 (was 5, refined)", r['scores']['dark'] == 4,
       f"score={r['scores']['dark']}")
 check("Yikong retail>100 + inst>10 -> not 'retail bubble'", 
       "bubble" not in r['notes']['subs'].lower() and "cold" not in r['notes']['subs'].lower(),

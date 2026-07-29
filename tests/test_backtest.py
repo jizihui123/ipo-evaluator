@@ -172,6 +172,36 @@ def test_json_output():
     print("✅ test_json_output passed")
 
 
+def test_range_veto():
+    """Dark < 0% should cap advice at CAUTIOUS (range-veto)"""
+    r = eval_hk_ipo(
+        "RangeVeto", "00005.HK", 10.0,
+        ref_price_cny=12.0, fx_rate=1.152,  # big discount to push score up
+        rating="AA+", scale_hk_yi=50,
+        retail_oversub=15, inst_oversub=8,
+        cornerstone=True, market_env="normal", sentiment="positive",
+        dark_signal=-1.0, ipos_same_week=1,  # dark negative but above veto threshold
+    )
+    assert "BUY" not in r['advice'], \
+        f"Expected CAUTIOUS (range-veto), got {r['advice']}"
+    assert 'range_veto' in r, "Expected range_veto in result"
+    print("✅ test_range_veto passed")
+
+
+def test_predicted_range_with_dark():
+    """predicted_range should be in output when dark signal is available"""
+    r = eval_hk_ipo(
+        "RangeTest", "00006.HK", 10.0,
+        ref_price_cny=10.0, fx_rate=1.152,
+        rating="AA+", scale_hk_yi=20,
+        retail_oversub=15, inst_oversub=8,
+        cornerstone=True, dark_signal=5.0, ipos_same_week=2,
+    )
+    assert 'predicted_range' in r, "Missing predicted_range"
+    assert '%' in r['predicted_range'], f"Bad range format: {r['predicted_range']}"
+    print("✅ test_predicted_range_with_dark passed")
+
+
 if __name__ == "__main__":
     test_anker_buy()
     test_tongrentang_skip()
@@ -183,6 +213,8 @@ if __name__ == "__main__":
     test_binhua_skip_veto()
     test_cost_warning()
     test_json_output()
+    test_range_veto()
+    test_predicted_range_with_dark()
     print(f"\n{'=' * 55}")
-    print("  All 10 tests passed! ✅")
+    print("  All 12 tests passed! ✅")
     print(f"{'=' * 55}")

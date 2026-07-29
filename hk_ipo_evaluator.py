@@ -276,6 +276,16 @@ def eval_hk_ipo(name, code, ipo_price_hkd, ref_price_cny=None, fx_rate=None,
     else:
         advice = "SKIP -"
 
+    # --- Range-veto: if dark predicts negative, cap advice at CAUTIOUS ---
+    # Prevents BUY when predicted range is negative (logic contradiction)
+    range_veto_reason = None
+    if dark_signal is not None and dark_signal < 0 and "BUY" in advice:
+        advice = "CAUTIOUS ?"
+        range_veto_reason = (
+            f"RANGE-VETO: dark {dark_signal}% < 0%, "
+            f"predicted first-day negative, BUY downgraded to CAUTIOUS"
+        )
+
     # --- Trading cost threshold ---
     # Lesson from EvoMap capsule: 85.2% win rate but -28.7% return due to poor risk/reward
     # HK IPO trading costs: ~1% commission + ~0.5% spread + potential margin interest
@@ -348,6 +358,8 @@ def eval_hk_ipo(name, code, ipo_price_hkd, ref_price_cny=None, fx_rate=None,
     }
     if veto_reason:
         result['veto'] = veto_reason
+    if range_veto_reason:
+        result['range_veto'] = range_veto_reason
     if cost_warning:
         result['cost_warning'] = cost_warning
     return result
@@ -373,6 +385,8 @@ def format_result(r):
         lines.append(f"  Est:      {r['predicted_range']}")
     if 'veto' in r:
         lines.append(f"  Veto:     {r['veto']}")
+    if 'range_veto' in r:
+        lines.append(f"  RangeVeto: {r['range_veto']}")
     if 'cost_warning' in r:
         lines.append(f"  Cost:     {r['cost_warning']}")
     lines.append(f"{'=' * 55}")
