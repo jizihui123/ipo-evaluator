@@ -14,6 +14,7 @@ This tool encodes lessons from real IPO outcomes in July 2026 into a transparent
 - **One-vote-veto mechanism**: dark market <= -4% triggers soft veto (CAUTIOUS), <= -8% triggers hard veto (SKIP)
 - **Trading cost warning**: when BUY is advised but predicted gain (from dark signal) < 3% trading cost threshold
 - **JSON output mode**: `to_json(result)` for programmatic integration
+- **A-share amplification**: for A+H listings, when A-share moves >5% on listing day, prediction range is amplified
 - **Pure Python stdlib** — no external dependencies, runs anywhere
 - **Backtest validated** with real IPO data (N=8, 100% directional accuracy)
 
@@ -106,7 +107,7 @@ Output:
 |-----|------|--------|-----------------|----------|
 ### Key Lessons
 
-**Accuracy: 8/8 = 100%** (N<20, observe not claim)
+**Accuracy: 11/11 = 100%** (N<20, observe not claim)
 
 | IPO | Date | Advice | Actual First Day | Correct? |
 |-----|------|--------|-----------------|----------|
@@ -116,8 +117,10 @@ Output:
 | Puyuan (02497.HK) | 7/9 | SKIP | -37.36% | ✅ |
 | Yikong Zhijia (07687.HK) | 7/8 | BUY | +9.99% | ✅ |
 | Binhua Group (06745.HK) | 7/10 | SKIP (veto) | -18.68% | ✅ |
-| Momenta | 7/8 | BUY | +6.00% | ✅ |
-| Anker (no dark) | 7/2 | BUY | +15.69% | ✅ |
+| Momenta (06880.HK) | 7/8 | BUY | +6.00% | ✅ |
+| Jinghe (02249.HK) | 7/10 | BUY | +12.00% | ✅ |
+| Basic Semi (09971.HK) | 7/8 | BUY | +8.00% | ✅ |
+| Zhongji Innolight (03308.HK) | 7/30 | CAUTIOUS (range-veto) | -2.04% | ✅ |
 
 1. **Dark market signal is the best first-day predictor** — dark -4.95% → actual -5.18% (near-perfect)
 2. **One-vote-veto caught crashes that weighted scores missed** — Luxshare scored 52 but dark signal correctly vetoed

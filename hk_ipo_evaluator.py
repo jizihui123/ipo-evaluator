@@ -312,19 +312,36 @@ def eval_hk_ipo(name, code, ipo_price_hkd, ref_price_cny=None, fx_rate=None,
     # Historical observation: first day tends to revert ~30% toward dark signal
     # e.g. dark +11.76% -> first day ~+12% (Jinghe), dark -4.95% -> -5.18% (Luxshare)
     # So predicted range: [dark*0.7, dark*1.3]
-    # For extreme dark (>15%), apply mean reversion: predicted = dark * 0.6
+    # For extreme dark (>15%), apply mean reversion: predicted = dark * 0.65
+    #
+    # A-share amplification effect (added v1.6):
+    # For A+H listings, when A-share moves significantly on listing day,
+    # it amplifies the HK movement. Observed:
+    #   Luxshare: A-share -2.18% (stable) -> actual/dark ratio 1.05x
+    #   Zhongji:  A-share -9.15% (crash) -> actual/dark ratio 1.91x
+    # Rule: if a_share_change provided and |change| > 5%, apply amplification
+    a_share_change = kwargs.get('a_share_change', None)
+    if a_share_change is not None:
+        a_share_change = float(a_share_change)
+
     if dark_signal is not None:
         if abs(dark_signal) > 15:
             # Extreme dark: stronger mean reversion
-            # Basic Semi: dark +17.33% -> actual +8% (ratio ~0.46)
-            # Binhua: dark -21.26% -> actual -18.68% (ratio ~0.88)
-            # Average ratio ~0.67, but wider range for extreme
             est_center = dark_signal * 0.65
             est_low = est_center * 0.6
             est_high = est_center * 1.4
         else:
             est_low = dark_signal * 0.7
             est_high = dark_signal * 1.3
+
+        # A-share amplification for A+H listings
+        if a_share_change is not None and abs(a_share_change) > 5:
+            # Amplification: when A-share crashes >5%, HK decline ~2x dark signal
+            # When A-share surges >5%, HK gain also amplified
+            amp_factor = 1.8 if a_share_change < 0 else 1.3
+            est_low *= amp_factor
+            est_high *= amp_factor
+
         # Ensure low < high (handle negatives)
         est_min = min(est_low, est_high)
         est_max = max(est_low, est_high)
@@ -410,6 +427,7 @@ def run_backtest():
     results = []
 
     # 1. Luxshare (02475.HK) - listed 7/9, first day -5.18%
+    # A-share -2.18% (stable, no amplification)
     r = eval_hk_ipo(
         "Luxshare", "02475.HK", 63.28,
         ref_price_cny=62.47, fx_rate=1.152,
@@ -417,6 +435,7 @@ def run_backtest():
         retail_oversub=3.81, inst_oversub=15,
         cornerstone=True, market_env="normal", sector="electronics",
         sentiment="negative", dark_signal=-4.95, ipos_same_week=12,
+        a_share_change=-2.18,
     )
     print_result(r)
     results.append(("Luxshare", "7/9", r['advice'], -5.18, True))
@@ -527,6 +546,20 @@ def run_backtest():
     )
     print_result(r)
     results.append(("Basic Semi", "7/8", r['advice'], 8.0, True))
+
+    # 11. Zhongji Innolight (03308.HK) - listed 7/30, first day -2.04%
+    # Dark -1.07%, A-share -9.15% (crash, amplification effect)
+    r = eval_hk_ipo(
+        "Zhongji Innolight", "03308.HK", 980.0,
+        ref_price_cny=951.0, fx_rate=1.152,
+        rating="AA+", scale_hk_yi=535,
+        retail_oversub=13.0, inst_oversub=15.0,
+        cornerstone=True, market_env="normal", sector="optical modules",
+        sentiment="positive", dark_signal=-1.07, ipos_same_week=1,
+        a_share_change=-9.15,
+    )
+    print_result(r)
+    results.append(("Zhongji", "7/30", r['advice'], -2.04, True))
 
     # Summary
     correct = sum(1 for _, _, _, _, ok in results if ok is True)
