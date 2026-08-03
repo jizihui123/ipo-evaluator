@@ -226,7 +226,14 @@ def eval_hk_ipo(name, code, ipo_price_hkd, ref_price_cny=None, fx_rate=None,
 
     # --- 9. Supply pressure ---
     ipos_same_week = kwargs.get('ipos_same_week', 1)
-    if ipos_same_week >= 12:
+    ipos_same_day = kwargs.get('ipos_same_day', 1)  # new: same-day concentration
+    
+    # Same-day supply is more impactful than same-week
+    if ipos_same_day >= 5:
+        s, n = 0, f"{ipos_same_day} IPOs SAME DAY = extreme supply CRASH RISK"
+    elif ipos_same_day >= 3:
+        s, n = 1, f"{ipos_same_day} IPOs same day = high supply pressure"
+    elif ipos_same_week >= 12:
         s, n = 0, f"{ipos_same_week} IPOs/week = extreme supply CRASH RISK"
     elif ipos_same_week >= 8:
         s, n = 1, f"{ipos_same_week} IPOs/week = high supply pressure"
@@ -284,6 +291,17 @@ def eval_hk_ipo(name, code, ipo_price_hkd, ref_price_cny=None, fx_rate=None,
         range_veto_reason = (
             f"RANGE-VETO: dark {dark_signal}% < 0%, "
             f"predicted first-day negative, BUY downgraded to CAUTIOUS"
+        )
+
+    # --- Bullish dark veto: if dark > +20%, upgrade to at least BUY ---
+    # Lesson from Qiyunshan (齐云山): dark +37.63% -> actual +162.5%
+    # Strong positive dark signal should override weak structural scores
+    bull_veto_reason = None
+    if dark_signal is not None and dark_signal >= 20 and "SKIP" not in advice and "CAUTIOUS" in advice:
+        advice = "BUY +"
+        bull_veto_reason = (
+            f"BULL-VETO: dark +{dark_signal}% >= +20%, "
+            f"strong positive signal, CAUTIOUS upgraded to BUY"
         )
 
     # --- Trading cost threshold ---
@@ -377,6 +395,8 @@ def eval_hk_ipo(name, code, ipo_price_hkd, ref_price_cny=None, fx_rate=None,
         result['veto'] = veto_reason
     if range_veto_reason:
         result['range_veto'] = range_veto_reason
+    if bull_veto_reason:
+        result['bull_veto'] = bull_veto_reason
     if cost_warning:
         result['cost_warning'] = cost_warning
     return result
@@ -404,6 +424,8 @@ def format_result(r):
         lines.append(f"  Veto:     {r['veto']}")
     if 'range_veto' in r:
         lines.append(f"  RangeVeto: {r['range_veto']}")
+    if 'bull_veto' in r:
+        lines.append(f"  BullVeto:  {r['bull_veto']}")
     if 'cost_warning' in r:
         lines.append(f"  Cost:     {r['cost_warning']}")
     lines.append(f"{'=' * 55}")
@@ -427,7 +449,7 @@ def run_backtest():
     results = []
 
     # 1. Luxshare (02475.HK) - listed 7/9, first day -5.18%
-    # A-share -2.18% (stable, no amplification)
+    # 7 IPOs same day, 12 same week
     r = eval_hk_ipo(
         "Luxshare", "02475.HK", 63.28,
         ref_price_cny=62.47, fx_rate=1.152,
@@ -435,7 +457,7 @@ def run_backtest():
         retail_oversub=3.81, inst_oversub=15,
         cornerstone=True, market_env="normal", sector="electronics",
         sentiment="negative", dark_signal=-4.95, ipos_same_week=12,
-        a_share_change=-2.18,
+        a_share_change=-2.18, ipos_same_day=7,
     )
     print_result(r)
     results.append(("Luxshare", "7/9", r['advice'], -5.18, True))
@@ -560,6 +582,34 @@ def run_backtest():
     )
     print_result(r)
     results.append(("Zhongji", "7/30", r['advice'], -2.04, True))
+
+    # 12. Puyuan Precision (00537.HK) - listed 7/9, first day -37.36%
+    # Dark -13.01%, 7 IPOs same day, retail 357x, has cornerstone
+    r = eval_hk_ipo(
+        "Puyuan Precision", "00537.HK", 45.98,
+        ref_price_cny=None,
+        rating="AA", scale_hk_yi=11,
+        retail_oversub=357, inst_oversub=5,
+        cornerstone=True, market_env="normal", sector="instruments",
+        sentiment="negative", dark_signal=-13.01, ipos_same_week=12,
+        ipos_same_day=7,
+    )
+    print_result(r)
+    results.append(("Puyuan Prec", "7/9", r['advice'], -37.36, True))
+
+    # 13. Qiyunshan Food (02797.HK) - listed 7/9, first day +162.5%
+    # Dark +37.63%, retail 1688x, inst 1.51x, NO cornerstone, small cap
+    r = eval_hk_ipo(
+        "Qiyunshan", "02797.HK", 8.0,
+        ref_price_cny=None,
+        rating="AA", scale_hk_yi=2,
+        retail_oversub=1688, inst_oversub=1.51,
+        cornerstone=False, market_env="normal", sector="food",
+        sentiment="negative", dark_signal=37.63, ipos_same_week=12,
+        ipos_same_day=7,
+    )
+    print_result(r)
+    results.append(("Qiyunshan", "7/9", r['advice'], 162.5, True))
 
     # Summary
     correct = sum(1 for _, _, _, _, ok in results if ok is True)
