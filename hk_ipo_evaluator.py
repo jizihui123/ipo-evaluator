@@ -191,6 +191,23 @@ def eval_hk_ipo(name, code, ipo_price_hkd, ref_price_cny=None, fx_rate=None,
     notes['env'] = n
 
     # --- 7. Sentiment ---
+    # Can be overridden by market_temp parameter (quantified sentiment)
+    # market_temp = recent IPO first-day break rate (0-1)
+    # <0.15 = very_positive, <0.25 = positive, <0.40 = neutral, <0.55 = negative, else crash
+    market_temp = kwargs.get('market_temp', None)
+    if market_temp is not None:
+        market_temp = float(market_temp)
+        if market_temp < 0.15:
+            sentiment = "positive"  # override
+        elif market_temp < 0.25:
+            sentiment = "positive"
+        elif market_temp < 0.40:
+            sentiment = "neutral"
+        elif market_temp < 0.55:
+            sentiment = "negative"
+        else:
+            sentiment = "crash"
+    
     smap = {
         "positive": (5, "recent IPOs up, A-share rising"),
         "neutral": (3, "mixed signals"),

@@ -96,6 +96,12 @@ Examples:
                         help="Dark market return in percent (e.g. -4.95)")
     parser.add_argument("--ipos-week", type=int, default=1,
                         help="Number of IPOs listing same week (default: 1)")
+    parser.add_argument("--ipos-day", type=int, default=1,
+                        help="Number of IPOs listing same DAY (default: 1)")
+    parser.add_argument("--market-temp", type=float, default=None,
+                        help="Recent IPO first-day break rate 0-1 (e.g. 0.40 = 40% break rate)")
+    parser.add_argument("--a-share", type=float, default=None,
+                        help="A-share real-time change %% (for A+H listings, amplification effect)")
     parser.add_argument("--cost-threshold", type=float, default=3.0,
                         help="Trading cost threshold %% for cost warning (default: 3.0)")
 
@@ -126,7 +132,10 @@ Examples:
         sentiment=args.sentiment,
         dark_signal=args.dark,
         ipos_same_week=args.ipos_week,
+        ipos_same_day=args.ipos_day,
         cost_threshold_pct=args.cost_threshold,
+        market_temp=args.market_temp,
+        a_share_change=args.a_share,
     )
 
     if args.json:
