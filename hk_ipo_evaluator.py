@@ -360,7 +360,13 @@ def eval_hk_ipo(name, code, ipo_price_hkd, ref_price_cny=None, fx_rate=None,
         a_share_change = float(a_share_change)
 
     if dark_signal is not None:
-        if abs(dark_signal) > 15:
+        if abs(dark_signal) > 30:
+            # Extreme positive dark (>=30%): small-cap speculation can multiply
+            # Qiyunshan: dark +37.63%, actual +162.5% (4.3x dark)
+            # Use wider range with higher upside
+            est_low = dark_signal * 0.4
+            est_high = dark_signal * 4.0
+        elif abs(dark_signal) > 15:
             # Extreme dark: stronger mean reversion
             est_center = dark_signal * 0.65
             est_low = est_center * 0.6
@@ -371,11 +377,16 @@ def eval_hk_ipo(name, code, ipo_price_hkd, ref_price_cny=None, fx_rate=None,
 
         # A-share amplification for A+H listings
         if a_share_change is not None and abs(a_share_change) > 5:
-            # Amplification: when A-share crashes >5%, HK decline ~2x dark signal
-            # When A-share surges >5%, HK gain also amplified
             amp_factor = 1.8 if a_share_change < 0 else 1.3
             est_low *= amp_factor
             est_high *= amp_factor
+
+        # Same-day supply pressure amplification
+        # Puyuan Prec: dark -13.01%, 7 same day, actual -37.36% (2.87x dark)
+        if ipos_same_day >= 5:
+            supply_amp = 1.5 if dark_signal < 0 else 0.8  # negative amplified, positive dampened
+            est_low *= supply_amp
+            est_high *= supply_amp
 
         # Ensure low < high (handle negatives)
         est_min = min(est_low, est_high)
@@ -383,14 +394,19 @@ def eval_hk_ipo(name, code, ipo_price_hkd, ref_price_cny=None, fx_rate=None,
         predicted_range = f"{est_min:+.1f}% ~ {est_max:+.1f}%"
     else:
         # No dark signal: use score-based estimate
+        # Widen range when structural scores are very weak
         if pct >= 75:
             predicted_range = "+5% ~ +20%"
         elif pct >= 55:
             predicted_range = "0% ~ +15%"
         elif pct >= 40:
             predicted_range = "-5% ~ +5%"
+        elif pct >= 30:
+            # Very weak: widen to capture crash risk
+            # Tongrentang: 39% -> actual -39%, Puyuan: 33% -> actual -37%
+            predicted_range = "-20% ~ -3%"
         else:
-            predicted_range = "-10% ~ -3%"
+            predicted_range = "-30% ~ -5%"
 
     result = {
         'name': name,
