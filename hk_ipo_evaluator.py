@@ -644,18 +644,49 @@ def run_backtest():
     print_result(r)
     results.append(("Qiyunshan", "7/9", r['advice'], 162.5, True))
 
+    # 14. Nasen Tech (02261.HK) - listed 8/7, PENDING
+    # Dark +50.67%, retail 2513x, inst 2.12x, NO cornerstone, 5B scale
+    # Same bimodal pattern as Qiyunshan: retail hot + inst cold + dark positive = moon?
+    r = eval_hk_ipo(
+        "Nasen", "02261.HK", 10.42,
+        ref_price_cny=None,
+        rating="AA", scale_hk_yi=5,
+        retail_oversub=2513.54, inst_oversub=2.12,
+        cornerstone=False, market_env="normal", sector="auto",
+        sentiment="negative", dark_signal=50.67, ipos_same_week=1,
+        ipos_same_day=1, market_temp=0.42,
+    )
+    print_result(r)
+    # Result pending - will be verified after 8/7 close
+    # Prediction: BUY (bull-veto), range +20.3% ~ +202.7%
+    results.append(("Nasen", "8/7", r['advice'], 0.0, "PENDING"))
+
     # Summary
     correct = sum(1 for _, _, _, _, ok in results if ok is True)
+    pending = sum(1 for _, _, _, _, ok in results if ok == "PENDING")
+    verified = [r for r in results if r[4] is True or r[4] is False]
     total = len(results)
     print(f"\n{'=' * 55}")
-    print(f"  BACKTEST SUMMARY (v1.5, N={total})")
+    print(f"  BACKTEST SUMMARY (v1.6, N={total}, verified={len(verified)}, pending={pending})")
     print(f"{'=' * 55}")
     print(f"  {'IPO':<16s} {'Date':<6s} {'Advice':<20s} {'Actual':>8s}  Result")
     print(f"  {'-' * 55}")
     for name, date, advice, actual, ok in results:
-        mark = "✅" if ok is True else "❌"
-        print(f"  {name:<16s} {date:<6s} {advice:<20s} {actual:>+7.2f}%  {mark}")
-    print(f"\n  Accuracy: {correct}/{total} = {correct/total*100:.0f}%")
+        if ok == "PENDING":
+            mark = "⏳"
+            actual_str = "pending"
+        elif ok is True or ok == "✅":
+            mark = "✅"
+            actual_str = f"{actual:>+7.2f}%"
+        else:
+            mark = "❌"
+            actual_str = f"{actual:>+7.2f}%"
+        print(f"  {name:<16s} {date:<6s} {advice:<20s} {actual_str:>8s}  {mark}")
+    if pending:
+        print(f"\n  Verified accuracy: {correct}/{len(verified)} = {correct/len(verified)*100:.0f}%")
+        print(f"  Pending: {pending} case(s) awaiting result")
+    else:
+        print(f"\n  Accuracy: {correct}/{total} = {correct/total*100:.0f}%")
     print(f"  Note: N<20, observe not claim")
     print(f"{'=' * 55}")
 
