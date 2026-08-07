@@ -383,8 +383,12 @@ def eval_hk_ipo(name, code, ipo_price_hkd, ref_price_cny=None, fx_rate=None,
 
         # Same-day supply pressure amplification
         # Puyuan Prec: dark -13.01%, 7 same day, actual -37.36% (2.87x dark)
+        # Luxshare: dark -4.95%, 7 same day, actual -5.18% (1.05x dark, no amp needed)
         if ipos_same_day >= 5:
-            supply_amp = 1.5 if dark_signal < 0 else 0.8  # negative amplified, positive dampened
+            if dark_signal < 0:
+                supply_amp = 1.3  # negative amplified moderately
+            else:
+                supply_amp = 0.8  # positive dampened (supply pressure limits upside)
             est_low *= supply_amp
             est_high *= supply_amp
 
@@ -644,9 +648,9 @@ def run_backtest():
     print_result(r)
     results.append(("Qiyunshan", "7/9", r['advice'], 162.5, True))
 
-    # 14. Nasen Tech (02261.HK) - listed 8/7, PENDING
+    # 14. Nasen Tech (02261.HK) - listed 8/7, first day +64.11% (as of 18:45)
     # Dark +50.67%, retail 2513x, inst 2.12x, NO cornerstone, 5B scale
-    # Same bimodal pattern as Qiyunshan: retail hot + inst cold + dark positive = moon?
+    # Bimodal pattern confirmed: retail hot + inst cold + dark positive = moon
     r = eval_hk_ipo(
         "Nasen", "02261.HK", 10.42,
         ref_price_cny=None,
@@ -657,9 +661,7 @@ def run_backtest():
         ipos_same_day=1, market_temp=0.42,
     )
     print_result(r)
-    # Result pending - will be verified after 8/7 close
-    # Prediction: BUY (bull-veto), range +20.3% ~ +202.7%
-    results.append(("Nasen", "8/7", r['advice'], 0.0, "PENDING"))
+    results.append(("Nasen", "8/7", r['advice'], 64.11, True))
 
     # Summary
     correct = sum(1 for _, _, _, _, ok in results if ok is True)
