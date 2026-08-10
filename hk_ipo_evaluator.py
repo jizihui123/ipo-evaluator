@@ -397,20 +397,47 @@ def eval_hk_ipo(name, code, ipo_price_hkd, ref_price_cny=None, fx_rate=None,
         est_max = max(est_low, est_high)
         predicted_range = f"{est_min:+.1f}% ~ {est_max:+.1f}%"
     else:
-        # No dark signal: use score-based estimate
-        # Widen range when structural scores are very weak
-        if pct >= 75:
-            predicted_range = "+5% ~ +20%"
-        elif pct >= 55:
-            predicted_range = "0% ~ +15%"
-        elif pct >= 40:
-            predicted_range = "-5% ~ +5%"
-        elif pct >= 30:
-            # Very weak: widen to capture crash risk
-            # Tongrentang: 39% -> actual -39%, Puyuan: 33% -> actual -37%
-            predicted_range = "-20% ~ -3%"
+        # No dark signal: use score-based estimate with structural adjustment
+        # Key finding: score-50 approximates actual for normal cases,
+        # but subs<=0 or corn<=1 amplifies the crash magnitude
+        score_offset = pct - 50  # e.g. +20 for score=70, -11 for score=39
+        
+        # Amplify negative when structural scores are weak
+        if score_offset < 0:
+            # Negative score: check for structural weakness
+            struct_weak = 0
+            if scores.get('subs', 3) <= 0:
+                struct_weak += 1
+            if scores.get('corn', 2) <= 1:
+                struct_weak += 1
+            if scores.get('sent', 3) <= 1:
+                struct_weak += 1
+            
+            if struct_weak >= 2:
+                # Multiple structural weaknesses: amplify crash
+                # Tongrentang: score-50=-11, actual=-39 (3.5x)
+                # Puyuan: score-50=-17, actual=-37 (2.2x)
+                est_low = score_offset * 4.0  # worst case
+                est_high = score_offset * 1.0  # mild case
+            elif struct_weak == 1:
+                est_low = score_offset * 2.5
+                est_high = score_offset * 0.8
+            else:
+                est_low = score_offset * 1.5
+                est_high = score_offset * 0.5
+        elif score_offset > 0:
+            # Positive score: upside potential
+            # Anker: score-50=+20, actual=+15.69 (0.78x)
+            est_low = score_offset * 0.3
+            est_high = score_offset * 1.5
         else:
-            predicted_range = "-30% ~ -5%"
+            est_low = -5
+            est_high = +5
+        
+        # Ensure low < high
+        est_min = min(est_low, est_high)
+        est_max = max(est_low, est_high)
+        predicted_range = f"{est_min:+.0f}% ~ {est_max:+.0f}%"
 
     result = {
         'name': name,
