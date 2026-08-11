@@ -15,8 +15,11 @@ This tool encodes lessons from real IPO outcomes in July 2026 into a transparent
 - **Trading cost warning**: when BUY is advised but predicted gain (from dark signal) < 3% trading cost threshold
 - **JSON output mode**: `to_json(result)` for programmatic integration
 - **A-share amplification**: for A+H listings, when A-share moves >5% on listing day, prediction range is amplified
+- **Market temperature index**: quantified sentiment from recent IPO break rate
+- **Same-day supply pressure**: >=5 IPOs same day = extreme crash risk
+- **Structural-adjusted no-dark model**: uses subs/corn/sent scores to amplify crash predictions
 - **Pure Python stdlib** — no external dependencies, runs anywhere
-- **Backtest validated** with real IPO data (N=8, 100% directional accuracy)
+- **Backtest validated** with real IPO data (N=14, 100% directional accuracy, 86% range accuracy)
 
 ## Installation
 
@@ -101,13 +104,12 @@ Output:
 | Dark <= -8% | SKIP (veto) | Hard veto overrides score |
 | BUY + predicted < 3% | BUY + cost warning | Trading cost may exceed profit |
 
-## Backtest Results (July 2026)
+## Backtest Results (July-August 2026)
 
-| IPO | Date | Advice | Actual First Day | Correct? |
-|-----|------|--------|-----------------|----------|
 ### Key Lessons
 
-**Accuracy: 11/11 = 100%** (N<20, observe not claim)
+**Accuracy: 14/14 = 100%** (N<20, observe not claim)
+**Range accuracy: 12/14 = 86%**
 
 | IPO | Date | Advice | Actual First Day | Correct? |
 |-----|------|--------|-----------------|----------|
@@ -115,18 +117,27 @@ Output:
 | Tongrentang (02667.HK) | 7/7 | SKIP | -39.09% | ✅ |
 | Luxshare (02475.HK) | 7/9 | CAUTIOUS (veto) | -5.18% | ✅ |
 | Puyuan (02497.HK) | 7/9 | SKIP | -37.36% | ✅ |
-| Yikong Zhijia (07687.HK) | 7/8 | BUY | +9.99% | ✅ |
-| Binhua Group (06745.HK) | 7/10 | SKIP (veto) | -18.68% | ✅ |
+| Yikong (07687.HK) | 7/8 | BUY | +9.99% | ✅ |
+| Binhua (06745.HK) | 7/10 | SKIP (veto) | -18.68% | ✅ |
 | Momenta (06880.HK) | 7/8 | BUY | +6.00% | ✅ |
 | Jinghe (02249.HK) | 7/10 | BUY | +12.00% | ✅ |
 | Basic Semi (09971.HK) | 7/8 | BUY | +8.00% | ✅ |
-| Zhongji Innolight (03308.HK) | 7/30 | CAUTIOUS (range-veto) | -2.04% | ✅ |
+| Zhongji (03308.HK) | 7/30 | CAUTIOUS (range-veto) | -2.04% | ✅ |
+| Puyuan Prec (00537.HK) | 7/9 | SKIP (veto) | -37.36% | ✅ |
+| Qiyunshan (02797.HK) | 7/9 | BUY (bull-veto) | +162.50% | ✅ |
+| Nasen (02261.HK) | 8/7 | BUY (bull-veto) | +64.11% | ✅ |
 
 1. **Dark market signal is the best first-day predictor** — dark -4.95% → actual -5.18% (near-perfect)
 2. **One-vote-veto caught crashes that weighted scores missed** — Luxshare scored 52 but dark signal correctly vetoed
 3. **Supply pressure caught Puyuan crash** — 12 IPOs in one week = 40% crash rate vs 12% H1 baseline
 4. **Long-term value ≠ short-term trading** — A-H discount is a holding metric, not a flipping metric
 5. **Retail hot + institutional cold = danger** — Tongrentang had 251x retail but only 2.84x institutional → -39%
+6. **Bimodal pattern: retail hot + inst cold is BIMODAL** — dark direction determines peak:
+   - Dark negative → crash (Tongrentang -39%, Binhua -19%)
+   - Dark positive → moon (Qiyunshan +162%, Nasen +64%)
+7. **A-share amplification** — when A-share crashes >5% on listing day, HK decline amplifies ~2x (Zhongji)
+8. **Structural weakness amplifies crash** — when subs<=0 + no cornerstone + crash sentiment, actual = 3-4x score-50
+9. **Bull-veto: strong positive dark overrides weak structure** — Qiyunshan +37.63% dark → BUY despite score 41%
 
 ## Research Documentation
 

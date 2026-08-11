@@ -38,7 +38,7 @@ from hk_ipo_evaluator import eval_hk_ipo, print_result, to_json, run_backtest
 
 def main():
     parser = argparse.ArgumentParser(
-        description="HK IPO Evaluator v1.5 - 9-dimension scoring model",
+        description="HK IPO Evaluator v1.7 - 9-dimension scoring model",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
@@ -99,11 +99,11 @@ Examples:
     parser.add_argument("--ipos-day", type=int, default=1,
                         help="Number of IPOs listing same DAY (default: 1)")
     parser.add_argument("--market-temp", type=float, default=None,
-                        help="Recent IPO first-day break rate 0-1 (e.g. 0.40 = 40% break rate)")
+                        help="Recent IPO first-day break rate 0-1 (e.g. 0.40 = 40pct break rate)")
     parser.add_argument("--a-share", type=float, default=None,
-                        help="A-share real-time change %% (for A+H listings, amplification effect)")
+                        help="A-share real-time change in pct (for A+H listings, amplification effect)")
     parser.add_argument("--cost-threshold", type=float, default=3.0,
-                        help="Trading cost threshold %% for cost warning (default: 3.0)")
+                        help="Trading cost threshold in pct for cost warning (default: 3.0)")
 
     parser.add_argument("--json", action="store_true",
                         help="Output as JSON instead of text")

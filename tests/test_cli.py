@@ -46,7 +46,7 @@ check("help shows examples", "Anker" in out, "missing examples")
 print("[Test 2] --backtest works")
 rc, out, err = run_cli("--backtest")
 check("backtest exits 0", rc == 0, f"rc={rc}, err={err[:200]}")
-check("backtest shows N=10", "N=10" in out, "missing N=10")
+check("backtest shows N=14", "N=14" in out, "missing N=14")
 check("backtest shows 100%", "100%" in out, "missing accuracy")
 check("backtest shows Anker", "Anker" in out, "missing Anker")
 
