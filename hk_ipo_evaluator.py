@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-HK IPO Evaluator v1.5
+HK IPO Evaluator v1.7
 ======================
 9-dimension weighted scoring model for Hong Kong IPO first-day trading decisions.
 
@@ -413,12 +413,16 @@ def eval_hk_ipo(name, code, ipo_price_hkd, ref_price_cny=None, fx_rate=None,
             if scores.get('sent', 3) <= 1:
                 struct_weak += 1
             
-            if struct_weak >= 2:
-                # Multiple structural weaknesses: amplify crash
-                # Tongrentang: score-50=-11, actual=-39 (3.5x)
+            if struct_weak >= 3:
+                # All three structural weaknesses: amplify crash
                 # Puyuan: score-50=-17, actual=-37 (2.2x)
-                est_low = score_offset * 4.0  # worst case
-                est_high = score_offset * 1.0  # mild case
+                est_low = score_offset * 3.0  # worst case
+                est_high = score_offset * 0.8  # mild case
+            elif struct_weak >= 2:
+                # Two structural weaknesses
+                # Tongrentang: score-50=-11, actual=-39 (3.5x)
+                est_low = score_offset * 3.7  # worst case
+                est_high = score_offset * 0.8  # mild case
             elif struct_weak == 1:
                 est_low = score_offset * 2.5
                 est_high = score_offset * 0.8
@@ -696,7 +700,7 @@ def run_backtest():
     verified = [r for r in results if r[4] is True or r[4] is False]
     total = len(results)
     print(f"\n{'=' * 55}")
-    print(f"  BACKTEST SUMMARY (v1.6, N={total}, verified={len(verified)}, pending={pending})")
+    print(f"  BACKTEST SUMMARY (v1.7, N={total}, verified={len(verified)}, pending={pending})")
     print(f"{'=' * 55}")
     print(f"  {'IPO':<16s} {'Date':<6s} {'Advice':<20s} {'Actual':>8s}  Result")
     print(f"  {'-' * 55}")
