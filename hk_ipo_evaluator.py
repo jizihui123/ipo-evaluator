@@ -372,7 +372,7 @@ def eval_hk_ipo(name, code, ipo_price_hkd, ref_price_cny=None, fx_rate=None,
             # Qiyunshan: dark +37.63%, actual +162.5% (4.3x dark)
             # Use wider range with higher upside
             est_low = dark_signal * 0.4
-            est_high = dark_signal * 4.0
+            est_high = dark_signal * 4.5
         elif abs(dark_signal) > 15:
             # Extreme dark: stronger mean reversion
             est_center = dark_signal * 0.65
@@ -391,13 +391,29 @@ def eval_hk_ipo(name, code, ipo_price_hkd, ref_price_cny=None, fx_rate=None,
         # Same-day supply pressure amplification
         # Puyuan Prec: dark -13.01%, 7 same day, actual -37.36% (2.87x dark)
         # Luxshare: dark -4.95%, 7 same day, actual -5.18% (1.05x dark, no amp needed)
+        # Binhua: dark -21.26%, 15 same week, actual -18.68% (0.88x, mean reversion)
+        # Key: moderate dark (-10 to -15) + same-day supply = EXPLOSIVE
+        # Extreme dark (>20) already prices in supply, less amplification
         if ipos_same_day >= 5:
             if dark_signal < 0:
-                supply_amp = 1.3  # negative amplified moderately
+                if -15 <= dark_signal <= -10:
+                    # Danger zone: moderate dark + supply = explosive crash
+                    supply_amp = 2.5  # Puyuan Prec: -13.01*2.5=-32.5 (actual -37.36)
+                elif dark_signal < -20:
+                    # Extreme dark: already priced in, minimal amplification
+                    supply_amp = 1.0
+                else:
+                    supply_amp = 1.3  # normal amplification
+                est_low *= supply_amp
+                est_high *= supply_amp
+            elif dark_signal >= 30:
+                # Extreme positive: supply pressure irrelevant, skip dampening
+                # Qiyunshan: dark +37.63%, 7 same-day, actual +162.5% (4.3x)
+                pass
             else:
                 supply_amp = 0.8  # positive dampened (supply pressure limits upside)
-            est_low *= supply_amp
-            est_high *= supply_amp
+                est_low *= supply_amp
+                est_high *= supply_amp
 
         # Ensure low < high (handle negatives)
         est_min = min(est_low, est_high)
