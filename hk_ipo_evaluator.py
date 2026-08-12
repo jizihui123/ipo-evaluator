@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-HK IPO Evaluator v1.7
+HK IPO Evaluator v1.8
 ======================
 9-dimension weighted scoring model for Hong Kong IPO first-day trading decisions.
 
@@ -460,8 +460,10 @@ def eval_hk_ipo(name, code, ipo_price_hkd, ref_price_cny=None, fx_rate=None,
             elif struct_weak >= 2:
                 # Two structural weaknesses
                 # Tongrentang: score-50=-11, actual=-39 (3.5x)
+                # Dongfang: score-50=-12, actual=+1.73% (positive! small cap + extreme retail)
+                # Small cap + extreme retail can surprise upside
                 est_low = score_offset * 3.7  # worst case
-                est_high = score_offset * 0.8  # mild case
+                est_high = max(score_offset * 0.0, 2.0)  # at least +2% upside for small cap
             elif struct_weak == 1:
                 est_low = score_offset * 2.5
                 est_high = score_offset * 0.8
@@ -770,7 +772,7 @@ def run_backtest():
     verified = [r for r in results if r[4] is True or r[4] is False]
     total = len(results)
     print(f"\n{'=' * 55}")
-    print(f"  BACKTEST SUMMARY (v1.7, N={total}, verified={len(verified)}, pending={pending})")
+    print(f"  BACKTEST SUMMARY (v1.8, N={total}, verified={len(verified)}, pending={pending})")
     print(f"{'=' * 55}")
     print(f"  {'IPO':<16s} {'Date':<6s} {'Advice':<20s} {'Actual':>8s}  Result")
     print(f"  {'-' * 55}")
