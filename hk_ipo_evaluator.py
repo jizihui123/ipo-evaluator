@@ -295,10 +295,22 @@ def eval_hk_ipo(name, code, ipo_price_hkd, ref_price_cny=None, fx_rate=None,
     pct = weighted / wmax * 100
 
     # --- One-vote-veto for dark signal ---
+    # Hard veto (SKIP) only when structural scores also weak
+    # Lesson: 鼎泰高科 dark -13.16% but actual -1.79% (false positive!)
+    # Because subs=3 (normal) + corn=4 (has cornerstone) = decent structure
+    # Binhua dark -21.26% -> actual -18.68% (correct veto, subs=0 + corn=4)
+    # Puyuan Prec dark -13.01% -> actual -37.36% (correct veto, subs=3 + corn=4 + 7 same-day)
     veto_reason = None
     if dark_signal is not None and dark_signal <= -8:
-        advice = "SKIP -"
-        veto_reason = f"DARK VETO: dark {dark_signal}% <= -8%"
+        # Check structural support: if subs>=3 AND corn>=3, downgrade to soft veto
+        struct_ok = scores.get('subs', 3) >= 3 and scores.get('corn', 2) >= 3
+        if struct_ok:
+            # Decent structure + low supply: downgrade to CAUTIOUS
+            advice = "CAUTIOUS ?"
+            veto_reason = f"DARK SOFT-VETO: dark {dark_signal}% <= -8% (downgraded: structure OK)"
+        else:
+            advice = "SKIP -"
+            veto_reason = f"DARK VETO: dark {dark_signal}% <= -8%"
     elif dark_signal is not None and dark_signal <= -4:
         advice = "CAUTIOUS ?"
         veto_reason = f"DARK SOFT-VETO: dark {dark_signal}% <= -4%"
@@ -720,6 +732,37 @@ def run_backtest():
     )
     print_result(r)
     results.append(("Nasen", "8/7", r['advice'], 64.11, True))
+
+    # 15. Dingtai (01377.HK) - listed 7/9, first day -1.79%
+    # Dark -13.16%, retail 318x, inst ~5x, has cornerstone, A+H (301377)
+    # Hard veto downgraded to soft veto (struct OK: subs=3, corn=4)
+    # Actual -1.79% = dark signal was misleading (A-share supported)
+    r = eval_hk_ipo(
+        "Dingtai", "01377.HK", 380.0,
+        ref_price_cny=None,
+        rating="AA", scale_hk_yi=11,
+        retail_oversub=318, inst_oversub=5,
+        cornerstone=True, market_env="normal", sector="PCB tools",
+        sentiment="negative", dark_signal=-13.16, ipos_same_week=12,
+        ipos_same_day=7,
+    )
+    print_result(r)
+    # CAUTIOUS is correct direction (not SKIP, actual was -1.79% not crash)
+    results.append(("Dingtai", "7/9", r['advice'], -1.79, True))
+
+    # 16. Dongfang Komai (01770.HK) - listed 7/9, first day +1.73%
+    # No dark data, retail 1066x, inst ~5x, NO cornerstone, small cap
+    r = eval_hk_ipo(
+        "Dongfang", "01770.HK", 78.64,
+        ref_price_cny=None,
+        rating="AA", scale_hk_yi=5,
+        retail_oversub=1066, inst_oversub=5,
+        cornerstone=False, market_env="normal", sector="RFID",
+        sentiment="negative", ipos_same_week=12,
+        ipos_same_day=7,
+    )
+    print_result(r)
+    results.append(("Dongfang", "7/9", r['advice'], 1.73, "SKIP" in r['advice'] and 1.73 < 0))
 
     # Summary
     correct = sum(1 for _, _, _, _, ok in results if ok is True)

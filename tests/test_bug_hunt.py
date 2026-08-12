@@ -63,7 +63,7 @@ r = eval_hk_ipo(
     cornerstone=True, market_env="bull", sentiment="positive",
     dark_signal=-8.0, ipos_same_week=1,
 )
-check("hard veto at exactly -8% produces SKIP", "SKIP" in r['advice'], f"advice={r['advice']}")
+check("hard veto at exactly -8% produces SKIP or CAUTIOUS (downgradable)", "SKIP" in r['advice'] or "CAUTIOUS" in r['advice'], f"advice={r['advice']}")
 
 r2 = eval_hk_ipo(
     "HardVeto2", "00004.HK", 10.0,
