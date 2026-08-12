@@ -260,6 +260,13 @@ def eval_hk_ipo(name, code, ipo_price_hkd, ref_price_cny=None, fx_rate=None,
         s, n = 3, f"{ipos_same_week} IPOs/week = mild supply pressure"
     else:
         s, n = 4, f"{ipos_same_week} IPOs/week = low supply OK"
+    
+    # Market sentiment adjustment: positive sentiment dampens supply pressure
+    # Anker: 8 IPOs/week but positive market -> supply had no impact (+15.69%)
+    # 7/9 cases: 12-15 IPOs/week + negative sentiment -> supply crash amplified
+    if scores.get('sent', 3) >= 4 and s < 3:
+        s = min(s + 1, 3)  # boost by 1, cap at 3
+        n += " (positive market dampens)"
     scores['supply'] = s
     notes['supply'] = n
 
