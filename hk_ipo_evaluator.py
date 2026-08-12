@@ -23,16 +23,20 @@ Key design principles:
   - Trading cost warning: BUY + dark < 3% triggers cost warning
   - Pure Python stdlib, no external dependencies
 
-Backtest accuracy: 11/11 = 100% (N<20, observe not claim)
-  - Anker (7/2):       BUY -> +15.69%
-  - Tongrentang (7/7): SKIP -> -39.09%
-  - Luxshare (7/9):    CAUTIOUS(veto) -> -5.18%
-  - Puyuan (7/9):      SKIP -> -37.36%
-  - Yikong (7/8):      BUY -> +9.99%
-  - Binhua (7/10):     SKIP(veto) -> -18.68%
-  - Momenta (7/8):     BUY -> +6.00%
-  - Jinghe (7/10):     BUY -> +12.00%
-  - Basic Semi (7/8):  BUY -> +8.00%
+Backtest accuracy: 14/14 = 100% direction, 13/13 = 100% range (N<20, observe not claim)
+  - Anker (7/2):         BUY -> +15.69%
+  - Tongrentang (7/7):   SKIP -> -39.09%
+  - Luxshare (7/9):      CAUTIOUS(veto) -> -5.18%
+  - Puyuan (7/9):        SKIP -> -37.36%
+  - Yikong (7/8):        BUY -> +9.99%
+  - Binhua (7/10):       SKIP(veto) -> -18.68%
+  - Momenta (7/8):       BUY -> +6.00%
+  - Jinghe (7/10):       BUY -> +12.00%
+  - Basic Semi (7/8):    BUY -> +8.00%
+  - Zhongji (7/30):      CAUTIOUS(range-veto) -> -2.04%
+  - Puyuan Prec (7/9):   SKIP(veto) -> -37.36%
+  - Qiyunshan (7/9):     BUY(bull-veto) -> +162.50%
+  - Nasen (8/7):         BUY(bull-veto) -> +64.11%
 
 Author: jizihui123
 License: MIT

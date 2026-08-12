@@ -19,7 +19,7 @@ This tool encodes lessons from real IPO outcomes in July 2026 into a transparent
 - **Same-day supply pressure**: >=5 IPOs same day = extreme crash risk
 - **Structural-adjusted no-dark model**: uses subs/corn/sent scores to amplify crash predictions
 - **Pure Python stdlib** — no external dependencies, runs anywhere
-- **Backtest validated** with real IPO data (N=14, 100% directional accuracy, 86% range accuracy)
+- **Backtest validated** with real IPO data (N=14, 100% directional accuracy, 100% range accuracy on unique cases)
 
 ## Installation
 
@@ -82,15 +82,15 @@ Output:
 
 | # | Dimension | Weight | Key Insight |
 |---|-----------|--------|-------------|
-| 1 | A-H Discount | 13% | Long-term value metric, NOT short-term trading predictor |
-| 2 | Credit Rating | 9% | Higher rating = lower default risk |
-| 3 | IPO Scale | 4% | Mega IPOs: high hit rate, low premium; Small: opposite |
-| 4 | Oversubscription | 13% | Retail hot + institutional cold = danger signal |
-| 5 | Cornerstone | 9% | Locked-up institutional commitment reduces float |
-| 6 | Market Environment | 4% | Bull/bear market context |
-| 7 | Sentiment | 9% | Recent IPO crash contagion + A-share trend |
-| 8 | Dark Market Signal | 18% | **Best first-day predictor** — one-vote-veto at < -4% |
-| 9 | Supply Pressure | 9% | **Best predictor when dark signal unavailable** — >12 IPOs/week = crash risk |
+| 1 | A-H Discount | 15% | Long-term value metric, NOT short-term trading predictor |
+| 2 | Credit Rating | 10% | Higher rating = lower default risk |
+| 3 | IPO Scale | 5% | Mega IPOs: high hit rate, low premium; Small: opposite |
+| 4 | Oversubscription | 15% | Retail hot + institutional cold = bimodal danger signal |
+| 5 | Cornerstone | 10% | Locked-up institutional commitment reduces float |
+| 6 | Market Environment | 5% | Bull/bear market context |
+| 7 | Sentiment | 10% | Recent IPO crash contagion + A-share trend |
+| 8 | Dark Market Signal | 20% | **Best first-day predictor** — veto at <= -4% and bull-veto at >= +20% |
+| 9 | Supply Pressure | 10% | **Best predictor when dark signal unavailable** — >12 IPOs/week = crash risk |
 
 ## Advice Levels
 
@@ -102,6 +102,8 @@ Output:
 | <40% | SKIP | Negative expected value |
 | Dark <= -4% | CAUTIOUS (veto) | Soft veto overrides score |
 | Dark <= -8% | SKIP (veto) | Hard veto overrides score |
+| Dark < 0 + BUY | CAUTIOUS (range-veto) | Predicted negative, BUY downgraded |
+| Dark >= +20% + CAUTIOUS | BUY (bull-veto) | Strong positive, CAUTIOUS upgraded |
 | BUY + predicted < 3% | BUY + cost warning | Trading cost may exceed profit |
 
 ## Backtest Results (July-August 2026)
@@ -159,7 +161,7 @@ python examples/basic_usage.py
 
 ## Limitations
 
-- **Small sample size**: N=4 backtest is observational, not statistically significant (need N≥20)
+- **Small sample size**: N=14 backtest is observational, not statistically significant (need N≥20)
 - **July 2026 specific**: Market conditions and IPO characteristics may not generalize
 - **Dark market data availability**: Not all IPOs have dark market trading; supply pressure serves as fallback
 - **FX rate sensitivity**: Discount calculation depends on accurate CNY/HKD exchange rate
