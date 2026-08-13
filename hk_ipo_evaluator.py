@@ -565,7 +565,7 @@ def run_backtest():
         rating="AA+", scale_hk_yi=242,
         retail_oversub=3.81, inst_oversub=15,
         cornerstone=True, market_env="normal", sector="electronics",
-        sentiment="negative", dark_signal=-4.95, ipos_same_week=12,
+        sentiment="negative", dark_signal=-5.97, ipos_same_week=12,
         a_share_change=-2.18, ipos_same_day=7,
     )
     print_result(r)
@@ -736,16 +736,14 @@ def run_backtest():
     results.append(("Nasen", "8/7", r['advice'], 64.11, True))
 
     # 15. Dingtai (01377.HK) - listed 7/9, first day -1.79%
-    # Dark -13.16%, retail 318x, inst ~5x, has cornerstone, A+H (301377)
-    # Hard veto downgraded to soft veto (struct OK: subs=3, corn=4)
-    # Actual -1.79% = dark signal was misleading (A-share supported)
+    # Dark -3.53% (NOT -13.16% which was opening price drop), retail 318x, inst ~5x, has cornerstone
     r = eval_hk_ipo(
         "Dingtai", "01377.HK", 380.0,
         ref_price_cny=None,
         rating="AA", scale_hk_yi=11,
         retail_oversub=318, inst_oversub=5,
         cornerstone=True, market_env="normal", sector="PCB tools",
-        sentiment="negative", dark_signal=-13.16, ipos_same_week=12,
+        sentiment="negative", dark_signal=-3.53, ipos_same_week=12,
         ipos_same_day=7,
     )
     print_result(r)
