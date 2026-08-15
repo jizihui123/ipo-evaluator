@@ -169,6 +169,11 @@ def eval_hk_ipo(name, code, ipo_price_hkd, ref_price_cny=None, fx_rate=None,
             s, n = 4, "inst-led OK"
         elif retail_oversub < 5 and inst_oversub < 5:
             s, n = 1, "cold BAD"
+        elif retail_oversub > 200 and inst_oversub >= 5:
+            # Extreme retail + medium inst: not normal, not BAD
+            # Dongfang: retail 1066x + inst 5x -> subs=3 (normal) was wrong
+            # These are bimodal: can moon (with positive dark) or crash
+            s, n = 3, f"retail extreme R:{retail_oversub:.0f}x inst medium (bimodal)"
         else:
             s, n = 3, "normal"
         notes['subs'] = f"R:{retail_oversub}x I:{inst_oversub}x"
