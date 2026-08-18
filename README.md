@@ -110,7 +110,8 @@ Output:
 
 ### Key Lessons
 
-**Accuracy: 14/14 = 100%** (N<20, observe not claim)
+**Accuracy: 16/17 = 94%** (N<20, observe not claim)
+**Range accuracy: 12/13 = 92%** (unique cases with verifiable data)
 **Range accuracy: 12/14 = 86%**
 
 | IPO | Date | Advice | Actual First Day | Correct? |
@@ -127,7 +128,8 @@ Output:
 | Zhongji (03308.HK) | 7/30 | CAUTIOUS (range-veto) | -2.04% | ✅ |
 | Puyuan Prec (00537.HK) | 7/9 | SKIP (veto) | -37.36% | ✅ |
 | Qiyunshan (02797.HK) | 7/9 | BUY (bull-veto) | +162.50% | ✅ |
-| Nasen (02261.HK) | 8/7 | BUY (bull-veto) | +64.11% | ✅ |
+| Nasen (02261.HK) | 8/7 | BUY (bull-veto) | +51.82% | ✅ |
+| Luoshi (03752.HK) | 7/9 | CAUTIOUS | +0.05% | ✅ |
 
 1. **Dark market signal is the best first-day predictor** — dark -4.95% → actual -5.18% (near-perfect)
 2. **One-vote-veto caught crashes that weighted scores missed** — Luxshare scored 52 but dark signal correctly vetoed
@@ -136,7 +138,7 @@ Output:
 5. **Retail hot + institutional cold = danger** — Tongrentang had 251x retail but only 2.84x institutional → -39%
 6. **Bimodal pattern: retail hot + inst cold is BIMODAL** — dark direction determines peak:
    - Dark negative → crash (Tongrentang -39%, Binhua -19%)
-   - Dark positive → moon (Qiyunshan +162%, Nasen +64%)
+   - Dark positive → moon (Qiyunshan +162%, Nasen +52%)
 7. **A-share amplification** — when A-share crashes >5% on listing day, HK decline amplifies ~2x (Zhongji)
 8. **Structural weakness amplifies crash** — when subs<=0 + no cornerstone + crash sentiment, actual = 3-4x score-50
 9. **Bull-veto: strong positive dark overrides weak structure** — Qiyunshan +37.63% dark → BUY despite score 41%
