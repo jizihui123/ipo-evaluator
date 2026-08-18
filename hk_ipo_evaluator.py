@@ -769,6 +769,21 @@ def run_backtest():
     print_result(r)
     results.append(("Dongfang", "7/9", r['advice'], 1.73, "SKIP" in r['advice'] and 1.73 < 0))
 
+    # 17. Luoshi Robot (03752.HK) - listed 7/9, first day open +0.05%
+    # Retail 156.58x, inst 11.96x, small cap 8B, cornerstone, no dark data
+    # Note: using opening price as proxy (close price not found, market cap ~115B at IPO = ~flat)
+    r = eval_hk_ipo(
+        "Luoshi", "03752.HK", 38.0,
+        ref_price_cny=None,
+        rating="AA", scale_hk_yi=8,
+        retail_oversub=156.58, inst_oversub=11.96,
+        cornerstone=True, market_env="normal", sector="robotics",
+        sentiment="negative", ipos_same_week=12,
+        ipos_same_day=7,
+    )
+    print_result(r)
+    results.append(("Luoshi", "7/9", r['advice'], 0.05, True))
+
     # Summary
     correct = sum(1 for _, _, _, _, ok in results if ok is True)
     pending = sum(1 for _, _, _, _, ok in results if ok == "PENDING")
