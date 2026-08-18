@@ -36,7 +36,7 @@ Backtest accuracy: 14/14 = 100% direction, 13/13 = 100% range (N<20, observe not
   - Zhongji (7/30):      CAUTIOUS(range-veto) -> -2.04%
   - Puyuan Prec (7/9):   SKIP(veto) -> -37.36%
   - Qiyunshan (7/9):     BUY(bull-veto) -> +162.50%
-  - Nasen (8/7):         BUY(bull-veto) -> +64.11%
+  - Nasen (8/7):         BUY(bull-veto) -> +51.82%
 
 Author: jizihui123
 License: MIT
@@ -725,9 +725,9 @@ def run_backtest():
     print_result(r)
     results.append(("Qiyunshan", "7/9", r['advice'], 162.5, True))
 
-    # 14. Nasen Tech (02261.HK) - listed 8/7, first day +64.11% (as of 18:45)
+    # 14. Nasen Tech (02261.HK) - listed 8/7, first day +51.82% (按盘价15.82)
     # Dark +50.67%, retail 2513x, inst 2.12x, NO cornerstone, 5B scale
-    # Bimodal pattern confirmed: retail hot + inst cold + dark positive = moon
+    # Note: earlier used +64.11% (intraday 17.10), corrected to +51.82% (按盘价 15.82)
     r = eval_hk_ipo(
         "Nasen", "02261.HK", 10.42,
         ref_price_cny=None,
@@ -738,7 +738,7 @@ def run_backtest():
         ipos_same_day=1, market_temp=0.42,
     )
     print_result(r)
-    results.append(("Nasen", "8/7", r['advice'], 64.11, True))
+    results.append(("Nasen", "8/7", r['advice'], 51.82, True))
 
     # 15. Dingtai (01377.HK) - listed 7/9, first day -1.79%
     # Dark -3.53% (NOT -13.16% which was opening price drop), retail 318x, inst ~5x, has cornerstone
