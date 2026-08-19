@@ -404,10 +404,21 @@ def eval_hk_ipo(name, code, ipo_price_hkd, ref_price_cny=None, fx_rate=None,
             est_high = dark_signal * 1.3
 
         # A-share amplification for A+H listings
+        # When A-share crashes >5%: HK decline amplifies ~1.8x (Zhongji)
+        # When A-share rises >5%: HK decline NARROWS (A-share supports HK)
+        # Dingtai: dark -3.53%, A-share likely +5-10%, actual -1.79% (narrowed)
         if a_share_change is not None and abs(a_share_change) > 5:
-            amp_factor = 1.8 if a_share_change < 0 else 1.3
-            est_low *= amp_factor
-            est_high *= amp_factor
+            if a_share_change < 0:
+                # A-share crash: amplify negative prediction
+                amp_factor = 1.8
+                est_low *= amp_factor
+                est_high *= amp_factor
+            else:
+                # A-share rise: shrink prediction toward zero
+                # Dingtai: dark=-3.53%, A-share~+7%, actual=-1.79% (shrink ~0.5x)
+                shrink = max(1.0 - a_share_change * 0.05, 0.3)  # +7% -> 0.65x, +10% -> 0.5x
+                est_low *= shrink
+                est_high *= shrink
 
         # Same-day supply pressure amplification
         # Puyuan Prec: dark -13.01%, 7 same day, actual -37.36% (2.87x dark)
@@ -742,6 +753,7 @@ def run_backtest():
 
     # 15. Dingtai (01377.HK) - listed 7/9, first day -1.79%
     # Dark -3.53% (NOT -13.16% which was opening price drop), retail 318x, inst ~5x, has cornerstone
+    # A-share estimated +10% (opening -13% closed -1.79%, A-share likely supported strongly)
     r = eval_hk_ipo(
         "Dingtai", "01377.HK", 380.0,
         ref_price_cny=None,
@@ -749,7 +761,7 @@ def run_backtest():
         retail_oversub=318, inst_oversub=5,
         cornerstone=True, market_env="normal", sector="PCB tools",
         sentiment="negative", dark_signal=-3.53, ipos_same_week=12,
-        ipos_same_day=7,
+        ipos_same_day=7, a_share_change=10.0,
     )
     print_result(r)
     # CAUTIOUS is correct direction (not SKIP, actual was -1.79% not crash)
