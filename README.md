@@ -18,8 +18,9 @@ This tool encodes lessons from real IPO outcomes in July 2026 into a transparent
 - **Market temperature index**: quantified sentiment from recent IPO break rate
 - **Same-day supply pressure**: >=5 IPOs same day = extreme crash risk
 - **Structural-adjusted no-dark model**: uses subs/corn/sent scores to amplify crash predictions
+- **Anti-overfitting mechanisms**: version freeze protocol, economic logic requirement, structural constraints over parameter tuning (see [docs/anti_overfitting.md](docs/anti_overfitting.md))
 - **Pure Python stdlib** — no external dependencies, runs anywhere
-- **Backtest validated** with real IPO data (N=14, 100% directional accuracy, 100% range accuracy on unique cases)
+- **Backtest validated** with real IPO data (N=17, 94% directional accuracy)
 
 ## Installation
 
@@ -143,10 +144,12 @@ Output:
 8. **Structural weakness amplifies crash** — when subs<=0 + no cornerstone + crash sentiment, actual = 3-4x score-50
 9. **Bull-veto: strong positive dark overrides weak structure** — Qiyunshan +37.63% dark → BUY despite score 41%
 
-## Research Documentation
+## Documentation
 
+- [Anti-Overfitting Analysis](docs/anti_overfitting.md) — ⚠️ Honest assessment of overfitting risk and mitigation protocols
+- [Model Analysis & Performance Metrics](docs/model_analysis.md) — Direction accuracy by data type, veto validation, known limitations
 - [HK IPO Crash Pattern Study (N=10)](docs/hk_ipo_crash_patterns.md) — 6-dimension analysis of what really predicts first-day performance
-- [Backtest Summary](docs/backtest_summary.md) — Detailed backtest report
+- [Backtest Summary](docs/backtest_summary.md) — Detailed backtest report with version evolution
 
 ## Running Tests
 
@@ -163,13 +166,19 @@ python examples/basic_usage.py
 
 ## Limitations
 
-- **Small sample size**: N=14 backtest is observational, not statistically significant (need N≥20)
-- **July 2026 specific**: Market conditions and IPO characteristics may not generalize
+- **Small sample size**: N=17 backtest is observational, not statistically significant (need N≥20)
+- **Overfitting risk acknowledged**: 71 parameters for 17 cases. Backtest accuracy (94%) is likely inflated. See [Anti-Overfitting Analysis](docs/anti_overfitting.md) for full assessment and mitigation protocols.
+- **Version freeze protocol**: Parameters frozen on existing cases. New IPOs serve as holdout validation.
+- **July 2026 specific**: All cases from same market period (40%+ break rate). May not generalize.
 - **Dark market data availability**: Not all IPOs have dark market trading; supply pressure serves as fallback
 - **FX rate sensitivity**: Discount calculation depends on accurate CNY/HKD exchange rate
+- **No-dark accuracy lower**: 67% direction accuracy without dark signal vs 100% with dark signal
 
 ## Roadmap
 
+- [ ] Holdout validation: 5+ new IPOs with zero parameter changes (in progress)
+- [ ] Cross-period validation: IPOs from different market conditions
+- [ ] Simplification: remove case-specific params if holdout accuracy < 70%
 - [ ] Add more backtest cases (target N=20)
 - [ ] Real-time dark market data integration
 - [ ] Historical supply pressure tracker
