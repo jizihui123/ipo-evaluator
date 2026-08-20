@@ -796,14 +796,15 @@ def run_backtest():
     print_result(r)
     results.append(("Luoshi", "7/9", r['advice'], 0.05, True))
 
-    # 18. Junzheng (03223.HK) - listed 8/25, PENDING
+    # 18. Junzheng (03223.HK) - listed 8/25, PENDING (HOLDOUT)
     # IPO 102.80, A-share 155.39 (disc 42.6%), 11 cornerstones, 31B scale
-    # Retail margin 178x (as of 8/18), positive sentiment, low supply
+    # Retail 689.3x (final margin data), positive sentiment, low supply
+    # NOTE: Holdout case - no parameter changes allowed
     r = eval_hk_ipo(
         "Junzheng", "03223.HK", 102.80,
         ref_price_cny=155.39, fx_rate=1.152,
         rating="AA", scale_hk_yi=31,
-        retail_oversub=178, inst_oversub=10,
+        retail_oversub=689.3, inst_oversub=10,
         cornerstone=True, market_env="normal", sector="semiconductor",
         sentiment="positive", ipos_same_week=1, ipos_same_day=1,
         market_temp=0.21,
