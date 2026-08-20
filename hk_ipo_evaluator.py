@@ -23,7 +23,9 @@ Key design principles:
   - Trading cost warning: BUY + dark < 3% triggers cost warning
   - Pure Python stdlib, no external dependencies
 
-Backtest accuracy: 14/14 = 100% direction, 13/13 = 100% range (N<20, observe not claim)
+Backtest accuracy: 16/17 = 94% direction (N<20, observe not claim)
+  Dark signal direction: 11/11 = 100% (strongest predictor)
+  No-dark direction: 4/6 = 67% (known limitation)
   - Anker (7/2):         BUY -> +15.69%
   - Tongrentang (7/7):   SKIP -> -39.09%
   - Luxshare (7/9):      CAUTIOUS(veto) -> -5.18%
