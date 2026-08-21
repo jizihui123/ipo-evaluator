@@ -84,6 +84,28 @@ Note: accuracy dropped from 100% to 94% because N increased from 14 to 17,
 adding harder cases (Dongfang false negative, Dingtai near-miss).
 This is expected and more honest than staying at 100% with cherry-picked cases.
 
+## Post-Holdout Candidate Improvements (Deferred)
+
+These issues were found during analysis but are NOT implemented due to
+the version freeze protocol. They will be evaluated after holdout validation.
+
+1. **Range-veto ignores discount protection**: When dark < 0 but A-H
+   discount > 30% + cornerstone present, range-veto should potentially
+   allow BUY (not downgrade to CAUTIOUS). The discount provides a large
+   safety margin that may offset the negative dark signal.
+   - Found from: Junzheng scenario analysis (dark=-1% + discount 43.2%)
+   - Current behavior: dark=-1% -> CAUTIOUS regardless of discount
+   - Proposed: if discount > 30% + corn >= 4, allow BUY despite dark < 0
+   - Risk: may cause false BUY on cases like Zhongji (discount 10.5%)
+   - Decision: DEFERRED until holdout results
+
+2. **Supply amp 1.3x may hurt some cases**: Luxshare range miss by 0.25pp
+   because supply amp pushes upper bound from -4.2% to -5.4%.
+   - Without amp: -7.8%~-4.2% hits -5.18%
+   - With amp: -10.1%~-5.4% misses -5.18%
+   - Decision: DEFERRED (Luxshare is frozen)
+This is expected and more honest than staying at 100% with cherry-picked cases.
+
 ---
 
 _Generated: 2026-08-19_
