@@ -106,7 +106,60 @@ the version freeze protocol. They will be evaluated after holdout validation.
    - Decision: DEFERRED (Luxshare is frozen)
 This is expected and more honest than staying at 100% with cherry-picked cases.
 
+## Score Calibration Analysis (2026-08-22)
+
+### Score-50 vs Actual Return: Inconsistent Ratio
+
+| IPO | Score-50 | Actual | Ratio | Note |
+|-----|---------|--------|-------|------|
+| Anker | +22 | +15.69% | 0.71x | Consistent |
+| Tongrentang | -11 | -39.09% | 3.55x | Structural amp |
+| Puyuan | -17 | -37.36% | 2.20x | Structural amp |
+| Zhongji | +24 | -2.04% | -0.09x | Veto flipped |
+| Qiyunshan | -9 | +162.5% | -18.06x | Bull-veto flipped |
+| Nasen | -1 | +51.82% | -51.82x | Bull-veto flipped |
+
+**Key finding**: Score-50 is NOT a reliable magnitude predictor when
+veto mechanisms flip the direction. The score is only meaningful for
+non-veto cases. When veto triggers, the dark signal dominates entirely.
+
+### CAUTIOUS Band Too Wide
+
+| Metric | Value |
+|--------|------|
+| CAUTIOUS actual range | -37.36% to +0.05% (37pp spread) |
+| Puyuan Prec | -37.36% (should be SKIP) |
+| Luoshi | +0.05% (barely positive) |
+
+The CAUTIOUS band captures too many different outcomes. This is a known
+limitation of the 3-level advice system (BUY/CAUTIOUS/SKIP).
+
+### Advice Level Calibration
+
+| Advice | Avg Score | Avg Actual | Assessment |
+|--------|-----------|------------|------------|
+| BUY | 64% | +35.2% | Conservative (good) |
+| CAUTIOUS | 51% | -9.3% | Too wide (weak) |
+| SKIP | 37% | -23.3% | Well-calibrated (good) |
+
+### Veto Mechanism Effectiveness
+
+All 5 veto-triggered cases are direction-correct:
+- Luxshare: soft veto confirmed CAUTIOUS ✅
+- Binhua: hard veto ensured SKIP ✅
+- Zhongji: range-veto prevented false BUY ✅
+- Qiyunshan: bull-veto caught +162.5% ✅
+- Nasen: bull-veto caught +51.82% ✅
+
+### Core Design Validation
+
+The dark signal veto system is the project's strongest feature:
+- 11/11 = 100% direction accuracy with dark data
+- 67% direction accuracy without dark data
+- Veto mechanisms (binary rules) are immune to overfitting
+- Score calibration is only relevant for non-veto cases
+
 ---
 
-_Generated: 2026-08-19_
-_Backtest: 16/17 = 94% (verified), 1 pending_
+_Generated: 2026-08-22_
+_Backtest: 16/17 = 94% (verified), 1 pending (Junzheng 8/25)_
