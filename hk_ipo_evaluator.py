@@ -799,13 +799,15 @@ def run_backtest():
     results.append(("Luoshi", "7/9", r['advice'], 0.05, True))
 
     # 18. Junzheng (03223.HK) - listed 8/25, PENDING (HOLDOUT)
-    # IPO 100.00 HKD (priced below 102.80 max), A-share 152.39 (disc 43.2%)
+    # IPO 100.00 HKD (priced below 102.80 max)
+    # A-share 138.48 RMB (as of 8/22, dropped from 152.75 on 8/20)
+    # A-H discount: 37.3% (narrowed from 43.2% due to A-share -9.3% drop)
     # 11 cornerstones (1.92B USD, 46.75% lockup), 31B scale
-    # Retail 689.3x, positive sentiment, low supply
+    # Retail 689.3x, market_temp 0.21, 8/24 dark market, 8/25 listing
     # NOTE: Holdout case - no parameter changes allowed
     r = eval_hk_ipo(
         "Junzheng", "03223.HK", 100.0,
-        ref_price_cny=152.75, fx_rate=1.152,
+        ref_price_cny=138.48, fx_rate=1.152,
         rating="AA", scale_hk_yi=31,
         retail_oversub=689.3, inst_oversub=10,
         cornerstone=True, market_env="normal", sector="semiconductor",
